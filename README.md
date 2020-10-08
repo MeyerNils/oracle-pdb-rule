@@ -1,4 +1,8 @@
 # oracle-pdb-rule
+[![Build Status](https://travis-ci.org/MeyerNils/oracle-pdb-rule.svg?branch=main)](https://travis-ci.org/MeyerNils/oracle-pdb-rule)
+[![Maven Central](https://img.shields.io/maven-central/v/bayern.meyer/oracle-pdb-rule.svg?label=Maven%20Central)](http://search.maven.org/#search%7Cga%7C1%7Cbayern.meyer)
+[![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/MeyerNils/oracle-pdb-rule.svg?label=License)](http://www.apache.org/licenses/)
+
 This Maven module is intended to ease the provisioning of an Oracle test database for integration or system tests based on JUnit. 
 
 It makes use of Oracles [Pluggable Database Feature](https://docs.oracle.com/database/121/CNCPT/cdbovrvw.htm) to create a new pluggable database (PDB) for JUnit tests and remove it again when the JVM shuts down. This approach is interesting, as other approaches like spinning up a database using Docker and the [Testcontainers](https://www.testcontainers.org/) framework, that work well for other databases like Postgres, does not scale for Oracle due to its high resource requirements and long startup and initialization times (> 10 minutes) for provided [Oracle Database Docker Images](https://github.com/oracle/docker-images/tree/master/OracleDatabase). 
