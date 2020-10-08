@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>bayern.meyer</groupId>
     <artifactId>oracle-pdb-rule</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
     <name>Oracle PDB JUnit Rule</name>
     <description>Maven module intended to ease the provisioning of an Oracle test database for integration or system tests based on JUnit</description>
     <url>https://github.com/MeyerNils/oracle-pdb-rule</url>
@@ -33,7 +31,7 @@
         <url>https://github.com/MeyerNils/oracle-pdb-rule</url>
         <connection>scm:git:https://github.com/MeyerNils/oracle-pdb-rule</connection>
         <developerConnection>scm:git:ssh://git@github.com/MeyerNils/oracle-pdb-rule</developerConnection>
-        <tag>HEAD</tag>
+        <tag>0.1</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>
