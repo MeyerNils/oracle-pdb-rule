@@ -94,6 +94,8 @@ Following properties can be configured using `-D`
 * **PDB_BASE_PATH** (${ORADATA}/${CDBNAME}/)
 * **CREATE_PDB** (`true`) - Use this property to skip PDB creation and use the database credentials provided for the CDB access to access the test database. This mode can be helpful to test locally without spinning up a new database over and over again. 
 * **KEEP_PDB** (`false`) - Use this property to skip PDB deletion after the tests have finished. This mode can be helpful to locally verify the database content after tests have been executed.
+* **CREATE_PDB_EAGER** (`false`) - Set this property to `true` to create the PDB already then the OraclePdb object gets created; otherwise the PDB will be created in the test rules `apply` method just before the test execution
+* **GRANT_UNLIMITED_TABLESPACE** (`false`) - Set this property to `true` to execute `GRANT UNLIMITED TABLESPACE TO <PDB_ADMIN_USER>` right after PDB creation
 ### Sharing a database between tests
 A new pluggable database is created for every `@Rule` or `@ClassRule` referenced instance of class `bayern.meyer.junit.rules.OraclePdb`. To share a database a shared instance of the rule class can be used.
 ```java

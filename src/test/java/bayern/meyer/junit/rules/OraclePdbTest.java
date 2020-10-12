@@ -10,7 +10,7 @@ import java.sql.Statement;
 
 public class OraclePdbTest {
     @ClassRule
-    public static OraclePdb oraclePdb = new OraclePdb();
+    public static OraclePdb oraclePdb = new OraclePdb(new OraclePdb.OraclePdbConfiguration().withCdbPassword("MgP4dODB"));
 
     @Test
     public void aTest() throws SQLException {
