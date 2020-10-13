@@ -81,7 +81,7 @@ class OraclePdbConfiguration private constructor(
         private var customPdbSeedPath: String? = null
 
         /**
-         * Use this method to create a PDB already on rule initialization and not lazy on [TestRule.apply]; this can be helpful if other rules, e.g. Flyway, rely on an existing database
+         * Use this method to create a PDB already on rule initialization and not lazy on [TestRule#apply]; this can be helpful if other rules, e.g. Flyway, rely on an existing database
          * If existing, property CREATE_PDB_EAGER has precedence over using this method. CREATE_PDB_EAGER defaults to `false`.
          *
          * @return `this`

@@ -51,12 +51,21 @@
         </repository>
     </distributionManagement>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jcenter</id>
+            <name>JCenter</name>
+            <url>https://jcenter.bintray.com/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <kotlin.version>1.4.10</kotlin.version>
+        <dokka.version>1.4.10</dokka.version>
     </properties>
 
     <dependencies>
@@ -94,6 +103,7 @@
     </dependencies>
 
     <build>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -105,11 +115,6 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                            </sourceDirs>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>test-compile</id>
@@ -166,23 +171,10 @@
                 <executions>
                     <execution>
                         <id>prepare-agent-test</id>
-                        <!--<configuration>
-                            <destFile>${project.build.directory}/jacoco-test.exec</destFile>
-                        </configuration>-->
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <!--<execution>
-                        <id>prepare-agent-it</id>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <destFile>${project.build.directory}/jacoco-it.exec</destFile>
-                        </configuration>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>-->
                     <!-- attached to Maven test phase -->
                     <execution>
                         <id>report-it</id>
@@ -260,14 +252,14 @@
                         </executions>
                     </plugin>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <groupId>org.jetbrains.dokka</groupId>
+                        <artifactId>dokka-maven-plugin</artifactId>
+                        <version>${dokka.version}</version>
                         <executions>
                             <execution>
-                                <id>attach-javadocs</id>
+                                <phase>prepare-package</phase>
                                 <goals>
-                                    <goal>jar</goal>
+                                    <goal>javadocJar</goal>
                                 </goals>
                             </execution>
                         </executions>
