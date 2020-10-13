@@ -21,6 +21,7 @@ An Oracle container database (CDB) being capable of provisioning PDBs can e.g. b
 * [Configuring the CDB access](#configuring-the-cdb-access)
 * [Sharing a database between tests](#sharing-a-database-between-tests)
 * [Troubleshooting](#troubleshooting)
+* [Background information](#background-information)
 
 ### Maven dependency
 Add this module as dependency to your project
@@ -28,7 +29,7 @@ Add this module as dependency to your project
 <dependency>
     <groupId>bayern.meyer</groupId>
     <artifactId>oracle-pdb-rule</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -40,7 +41,7 @@ public class AnIntegrationTest {
     public static OraclePdb oraclePdb = new OraclePdb();
 
     @Test
-    public void aTest() { ... }
+    public void aTest() { /*...*/ }
 }
 ```
 ### Accessing the database
@@ -63,7 +64,26 @@ public class AnIntegrationTest {
     }
 
     @Test
-    public void aTest() { ... }
+    public void aTest() { /*...*/ }
+}
+```
+Besides a `OracleDataSource` can be obtained directly.
+```java
+public class AnIntegrationTest {
+    @ClassRule
+    public static OraclePdb oraclePdb = new OraclePdb();
+
+    @BeforeClass
+    public static void prepareDatabaseServer() throws SQLException {
+        final OracleDataSource pdbAdminDataSource = oraclePdb.getPdbDataSource();
+
+        try (Connection connection = pdbAdminDataSource.getConnection(); Statement statement = connection.createStatement()) {
+            statement.execute("...");
+        }
+    }
+
+    @Test
+    public void aTest() { /*...*/ }
 }
 ```
 ### Configuring the CDB access
@@ -71,10 +91,10 @@ The CDB access can be configured programmatically. See JavaDoc for public method
 ```java
 public class AnIntegrationTest {
     @ClassRule
-    public static OraclePdb oraclePdb = new OraclePdb().withCdbJdbcUrl("jdbc:oracle:thin:@localhost:1521/ORCLCDB").withCdbUsername("sys as sysdba").withCdbPassword("oracle");
+    public static OraclePdb oraclePdb = new OraclePdb(new OraclePdbConfiguration.Builder().withCdbJdbcUrl("jdbc:oracle:thin:@localhost:1521/ORCLCDB").withCdbUsername("sys as sysdba").withCdbPassword("oracle").build());
 
     @Test
-    public void aTest() { ... }
+    public void aTest() { /*...*/ }
 }
 ```
 Besides CDB access and other setting can be configured using system properties. If both, programmatic and system properties are configured the system properties take precedence. 
@@ -108,7 +128,7 @@ public class AnIntegrationTest {
     public static OraclePdb oraclePdb = PdbProvider.oraclePdb;
 
     @Test
-    public void aTest() { ... }
+    public void aTest() { /*...*/ }
 }
 
 public class AnotherIntegrationTest {
@@ -116,8 +136,21 @@ public class AnotherIntegrationTest {
     public static OraclePdb oraclePdb = PdbProvider.oraclePdb;
 
     @Test
-    public void anotherTest() { ... }
+    public void anotherTest() { /*...*/ }
 }
 ```
 ### Troubleshooting
 SLF is used as logging API. Helpful information is logged on info and debug level using the logger `bayern.meyer.junit.rules.OraclePdb`.
+### Background information
+Following SQL statements are executed for creating a pluggable database
+```sql
+ALTER SESSION SET CONTAINER = CDB$ROOT
+CREATE PLUGGABLE DATABASE ${pdbName} ADMIN USER ${pdbAdminUser} IDENTIFIED BY ${pdbAdminPassword} ROLES=(DBA) FILE_NAME_CONVERT=('${pdbSeedPath}','${pdbPath}')
+ALTER PLUGGABLE DATABASE ${pdbName} OPEN
+```
+Following SQL statements are executed for removing a pluggable database
+```sql
+ALTER SESSION SET CONTAINER = CDB$ROOT
+ALTER PLUGGABLE DATABASE ${pdbName} CLOSE IMMEDIATE
+DROP PLUGGABLE DATABASE ${pdbName} INCLUDING DATAFILES
+```
