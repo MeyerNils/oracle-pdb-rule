@@ -4,7 +4,7 @@
 
     <groupId>bayern.meyer</groupId>
     <artifactId>oracle-pdb-rule</artifactId>
-    <version>0.3</version>
+    <version>0.4-SNAPSHOT</version>
     <name>Oracle PDB JUnit Rule</name>
     <description>Maven module intended to ease the provisioning of an Oracle test database for integration or system
         tests based on JUnit
@@ -33,7 +33,7 @@
         <url>https://github.com/MeyerNils/oracle-pdb-rule</url>
         <connection>scm:git:https://github.com/MeyerNils/oracle-pdb-rule</connection>
         <developerConnection>scm:git:ssh://git@github.com/MeyerNils/oracle-pdb-rule</developerConnection>
-        <tag>0.3</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>
