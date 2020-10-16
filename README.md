@@ -29,7 +29,7 @@ Add this module as dependency to your project
 <dependency>
     <groupId>bayern.meyer</groupId>
     <artifactId>oracle-pdb-rule</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
     <scope>test</scope>
 </dependency>
 ```
@@ -107,7 +107,8 @@ Following properties can be configured using `-D`
 * **CDB_HOST** (localhost)
 * **CDB_PORT** (1521)
 * **CDB_NAME** (ORCLCDB)
-* **CDB_JDBC_URL** (jdbc:oracle:thin:@${CDB_HOST}:${CDB_PORT}/${CDB_NAME})
+* **CDB_DOMAIN** () - suffix to add to the CDB name to build the jdbc connection URL
+* **CDB_JDBC_URL** (jdbc:oracle:thin:@${CDB_HOST}:${CDB_PORT}/${CDB_NAME}${CDB_DOMAIN})
 * **ORADATA_FOLDER** (/opt/oracle/oradata)
 * **PDBSEED_NAME** (pdbseed)
 * **PDB_SEED_PATH** (${ORADATA}/${CDBNAME}/${PDBSEED_NAME}/)
@@ -142,11 +143,17 @@ public class AnotherIntegrationTest {
 ### Troubleshooting
 SLF is used as logging API. Helpful information is logged on info and debug level using the logger `bayern.meyer.junit.rules.OraclePdb`.
 ### Background information
-Following SQL statements are executed for creating a pluggable database
+Following SQL statements are executed for creating a pluggable database and determining its service name
 ```sql
 ALTER SESSION SET CONTAINER = CDB$ROOT
 CREATE PLUGGABLE DATABASE ${pdbName} ADMIN USER ${pdbAdminUser} IDENTIFIED BY ${pdbAdminPassword} ROLES=(DBA) FILE_NAME_CONVERT=('${pdbSeedPath}','${pdbPath}')
 ALTER PLUGGABLE DATABASE ${pdbName} OPEN
+ALTER SESSION SET CONTAINER = ${pdbName}
+SELECT sys_context('userenv','service_name') FROM dual
+```
+Following SQL statement is executed to grant unlimited tablespace (if `GRANT_UNLIMITED_TABLESPACE` is set to `true`)
+```sql
+GRANT UNLIMITED TABLESPACE TO ${pdbAdminUser}
 ```
 Following SQL statements are executed for removing a pluggable database
 ```sql

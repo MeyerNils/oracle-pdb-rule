@@ -18,7 +18,8 @@ class OraclePdb @JvmOverloads constructor(private val oraclePdbConfiguration: Or
      * @return The JDBC URL to access the test database
      */
     val pdbJdbcUrl: String
-        get() = oraclePdbConfiguration.pdbJdbcUrl
+        get() = if (oraclePdbConfiguration.createPdb) calculatePdbJdbcUrl() else oraclePdbConfiguration.cdbJdbcUrl
+
 
     /**
      * Get the username to access the created PDB as admin
@@ -44,9 +45,10 @@ class OraclePdb @JvmOverloads constructor(private val oraclePdbConfiguration: Or
      *
      * @return The DataSource to access the test database
      */
-    val pdbDataSource = initializePdbDataSource()
+    val pdbDataSource by lazy { initializePdbDataSource() }
 
     private var pdbCreated = false
+    private lateinit var pdbServiceName: String;
 
     override fun apply(statement: Statement, description: Description): Statement {
         return object : Statement() {
@@ -57,6 +59,10 @@ class OraclePdb @JvmOverloads constructor(private val oraclePdbConfiguration: Or
         }
     }
 
+    private fun calculatePdbJdbcUrl(): String {
+        return oraclePdbConfiguration.cdbJdbcUrl.substring(0, oraclePdbConfiguration.cdbJdbcUrl.lastIndexOf("/") + 1) + pdbServiceName
+    }
+
     private fun createPdbIfNeeded() {
         if (oraclePdbConfiguration.createPdb && !pdbCreated) {
             cdbDataSource.connection.use { connection ->
@@ -64,11 +70,16 @@ class OraclePdb @JvmOverloads constructor(private val oraclePdbConfiguration: Or
                     cdbStatement.execute("ALTER SESSION SET CONTAINER = CDB\$ROOT")
                     cdbStatement.execute("CREATE PLUGGABLE DATABASE ${oraclePdbConfiguration.pdbName} ADMIN USER ${oraclePdbConfiguration.pdbAdminUser} IDENTIFIED BY ${oraclePdbConfiguration.pdbAdminPassword} ROLES=(DBA) FILE_NAME_CONVERT=('${oraclePdbConfiguration.pdbSeedPath}','${oraclePdbConfiguration.pdbPath}')")
                     cdbStatement.execute("ALTER PLUGGABLE DATABASE ${oraclePdbConfiguration.pdbName} OPEN")
-                    LOGGER.info("Created PDB ${oraclePdbConfiguration.pdbName} with admin user ${oraclePdbConfiguration.pdbAdminUser} - connect using ${oraclePdbConfiguration.pdbJdbcUrl}")
-                    if (oraclePdbConfiguration.grantUnlimitedTablespace)
-                        grantUnlimitedTablespace()
+                    cdbStatement.execute("ALTER SESSION SET CONTAINER = ${oraclePdbConfiguration.pdbName}")
+                    cdbStatement.execute("SELECT sys_context('userenv','service_name') FROM dual")
+                    pdbServiceName = cdbStatement.resultSet.use {
+                        if (it.next()) it.getString(1) else oraclePdbConfiguration.pdbName
+                    }
+                    LOGGER.info("Created PDB ${oraclePdbConfiguration.pdbName} with admin user ${oraclePdbConfiguration.pdbAdminUser} - connect using $pdbJdbcUrl")
                     if (!oraclePdbConfiguration.keepPdb)
                         removePdbShutdownHook.registerPdbToRemove(Pair(oraclePdbConfiguration.pdbName, cdbDataSource))
+                    if (oraclePdbConfiguration.grantUnlimitedTablespace)
+                        grantUnlimitedTablespace()
                     pdbCreated = true
                 }
             }
@@ -77,7 +88,7 @@ class OraclePdb @JvmOverloads constructor(private val oraclePdbConfiguration: Or
 
     private fun initializePdbDataSource(): OracleDataSource {
         val oracleDataSource = OracleDataSource()
-        oracleDataSource.url = oraclePdbConfiguration.pdbJdbcUrl
+        oracleDataSource.url = pdbJdbcUrl
         oracleDataSource.user = oraclePdbConfiguration.pdbAdminUser
         oracleDataSource.setPassword(oraclePdbConfiguration.pdbAdminPassword)
         return oracleDataSource

@@ -36,19 +36,6 @@ class OraclePdbConfiguration private constructor(
     val pdbAdminUser = randomAlphabetic(12).toUpperCase()
         get() = if (createPdb) field else cdbUsername
 
-    /**
-     * Get the JDBC URL to access the created PDB
-     * If CREATE_PDB is set to `false`, the CDB JDBC URL is returned
-     *
-     * @return The JDBC URL to access the test database
-     */
-    val pdbJdbcUrl: String
-        get() = if (createPdb) calculatePdbJdbcUrl() else cdbJdbcUrl
-
-    private fun calculatePdbJdbcUrl(): String {
-        return cdbJdbcUrl.substring(0, cdbJdbcUrl.lastIndexOf("/") + 1) + pdbName
-    }
-
     companion object {
         private val LOGGER = LoggerFactory.getLogger(OraclePdbConfiguration::class.java)
         private val random = Random()
@@ -69,6 +56,7 @@ class OraclePdbConfiguration private constructor(
         private var cdbName = System.getProperty(PropertyKeys.CDB_NAME, "ORCLCDB")
         private var cdbHost = System.getProperty(PropertyKeys.CDB_HOST, "localhost")
         private var cdbPort = System.getProperty(PropertyKeys.CDB_PORT, "1521")
+        private var cdbDomain = System.getProperty(PropertyKeys.CDB_DOMAIN, "")
         private var pdbSeedName = System.getProperty(PropertyKeys.PDBSEED_NAME, "pdbseed")
         private var cdbUsername = System.getProperty(PropertyKeys.CDB_USERNAME, "sys as sysdba")
         private var cdbPassword = System.getProperty(PropertyKeys.CDB_PASSWORD, "oracle")
@@ -143,6 +131,16 @@ class OraclePdbConfiguration private constructor(
          * @return `this`
          */
         fun withCdbName(cdbName: String) = applyIfPropertyIsNotSet(PropertyKeys.CDB_NAME) { this.cdbName = cdbName }
+
+        /**
+         * Used to add a domain name to the CDB name to derive the service name
+         * If existing, property CDB_DOMAIN has precedence over using this method.
+         * Defaults to ``
+         *
+         * @param cdbDomain The domain name suffix of the CDB, e.g. `.mydomain.com`
+         * @return `this`
+         */
+        fun withCdbDomain(cdbDomain: String) = applyIfPropertyIsNotSet(PropertyKeys.CDB_DOMAIN) { this.cdbDomain = cdbDomain }
 
         /**
          * Used to specify access to the CDB.
@@ -224,7 +222,7 @@ class OraclePdbConfiguration private constructor(
                 }
 
         fun build() = OraclePdbConfiguration(
-                cdbJdbcUrl = System.getProperty(PropertyKeys.CDB_JDBC_URL, if (customCdbJdbcUrl != null) customCdbJdbcUrl else "jdbc:oracle:thin:@$cdbHost:$cdbPort/$cdbName"),
+                cdbJdbcUrl = System.getProperty(PropertyKeys.CDB_JDBC_URL, if (customCdbJdbcUrl != null) customCdbJdbcUrl else "jdbc:oracle:thin:@$cdbHost:$cdbPort/$cdbName$cdbDomain"),
                 cdbUsername = cdbUsername,
                 cdbPassword = cdbPassword,
                 keepPdb = keepPdb,
@@ -242,6 +240,7 @@ object PropertyKeys {
     const val CREATE_PDB_EAGER = "CREATE_PDB_EAGER"
     const val ORADATA_FOLDER = "ORADATA_FOLDER"
     const val CDB_NAME = "CDB_NAME"
+    const val CDB_DOMAIN = "CDB_DOMAIN"
     const val CDB_HOST = "CDB_HOST"
     const val CDB_PORT = "CDB_PORT"
     const val PDBSEED_NAME = "PDBSEED_NAME"

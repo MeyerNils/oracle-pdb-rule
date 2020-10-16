@@ -8,7 +8,6 @@ class OraclePdbConfigurationTest: AbstractConfigurationTest()  {
     @Test
     fun testDefaultValues() {
         val oraclePdbConfiguration = OraclePdbConfiguration.Builder().build()
-        assertEquals(oraclePdbConfiguration.cdbJdbcUrl.substringBeforeLast("/") + "/"  + oraclePdbConfiguration.pdbName, oraclePdbConfiguration.pdbJdbcUrl)
         assertEquals("jdbc:oracle:thin:@localhost:1521/ORCLCDB", oraclePdbConfiguration.cdbJdbcUrl)
         assertEquals("sys as sysdba", oraclePdbConfiguration.cdbUsername)
         assertEquals("oracle", oraclePdbConfiguration.cdbPassword)
@@ -23,7 +22,6 @@ class OraclePdbConfigurationTest: AbstractConfigurationTest()  {
     @Test
     fun testUseCdb() {
         val oraclePdbConfiguration = OraclePdbConfiguration.Builder().withCdbUsername("cdbUser").withCdbPassword("cdbPassword").andDoNotCreatePdb().build()
-        assertEquals(oraclePdbConfiguration.cdbJdbcUrl, oraclePdbConfiguration.pdbJdbcUrl)
         assertEquals(oraclePdbConfiguration.cdbUsername, oraclePdbConfiguration.pdbAdminUser)
         assertEquals(oraclePdbConfiguration.cdbPassword, oraclePdbConfiguration.pdbAdminPassword)
         assertEquals(false, oraclePdbConfiguration.createPdb)
@@ -51,8 +49,8 @@ class OraclePdbConfigurationTest: AbstractConfigurationTest()  {
 
     @Test
     fun testConnectionSettings() {
-        val oraclePdbConfiguration = OraclePdbConfiguration.Builder().withCdbHost("host").withCdbPort("port").withCdbName("name").build()
-        assertEquals("jdbc:oracle:thin:@host:port/name", oraclePdbConfiguration.cdbJdbcUrl)
+        val oraclePdbConfiguration = OraclePdbConfiguration.Builder().withCdbHost("host").withCdbPort("port").withCdbName("name").withCdbDomain(".mydomain.com").build()
+        assertEquals("jdbc:oracle:thin:@host:port/name.mydomain.com", oraclePdbConfiguration.cdbJdbcUrl)
     }
 
     @Test
